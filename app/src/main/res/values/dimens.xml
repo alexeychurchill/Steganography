@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="activity_padding">10dp</dimen>
+    <dimen name="min_height_image_view">100dp</dimen>
+    <dimen name="text_view_margin">10dp</dimen>
+</resources>
