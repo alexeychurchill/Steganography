@@ -17,4 +17,6 @@
     <string name="text_toast_no_image">Choose an image!</string>
     <string name="text_toast_string_empty">Input string is empty</string>
     <string name="text_toast_image_saving_failed">Image saving failed</string>
+    <string name="text_toast_finished">Finished:)</string>
+    <string name="text_toast_dir_creation_fail">Directory creation fail:(</string>
 </resources>

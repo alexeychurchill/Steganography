@@ -38,12 +38,11 @@ public class LSBDecodeTask extends AsyncTask<Bitmap, Double, String> {
                 int green = Color.green(color);
                 int blue = Color.blue(color);
                 red = (red & 0x7) << 5;
-                green = (green & 0x4) << 3;
+                green = (green & 0x3) << 3;
                 blue = blue & 0x7;
                 char character = (char) (red | green | blue);
-//                Log.d("zzz", "char: " + /*character +*/ "(" + x +"; " + y +")");
+                // Message read
                 if (character == '\0') {
-                    Log.d("zzz", "message: " + builder.toString());
                     return builder.toString();
                 }
                 builder.append(character);

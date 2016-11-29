@@ -31,10 +31,8 @@ public class LSBEncodeTask extends AsyncTask<SteganographySource, Double, Bitmap
         int sourceHeight = inputBitmap.getWidth();
         long totalPixels = sourceWidth * sourceHeight;
         long encodedPixels = 0;
-//        Bitmap outputBitmap = Bitmap
-//                .createBitmap(sourceWidth, sourceHeight, Bitmap.Config.ARGB_8888);
         Bitmap outputBitmap = inputBitmap.copy(Bitmap.Config.ARGB_8888, true);
-        String source = steganographySources[0].getSource();
+        String source = steganographySources[0].getText();
 
         if (source == null) {
             return null;
@@ -53,8 +51,8 @@ public class LSBEncodeTask extends AsyncTask<SteganographySource, Double, Bitmap
             blue /= 8;
             // Character components of color
             int charRed = (((int) character) >> 5) & 0x7;
-            int charGreen = (((int) character) >> 3) & 0x4;
-            int charBlue = (((int) character) & 0x7);
+            int charGreen = (((int) character) >> 3) & 0x3;
+            int charBlue = ((int) character) & 0x7;
             // Colors transforming
             red = (red << 3) | charRed;
             green = (green << 2) | charGreen;
@@ -62,6 +60,7 @@ public class LSBEncodeTask extends AsyncTask<SteganographySource, Double, Bitmap
             color = Color.rgb(red, green, blue);
             outputBitmap.setPixel(x, y, color);
             // Image pixel incrementation
+            x++;
             if (x >= sourceWidth) {
                 x = 0;
                 y++;

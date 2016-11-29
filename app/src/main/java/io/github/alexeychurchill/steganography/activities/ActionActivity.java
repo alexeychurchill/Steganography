@@ -3,13 +3,10 @@ package io.github.alexeychurchill.steganography.activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.os.EnvironmentCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -58,13 +55,6 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
         setContentView(R.layout.activity_action);
         initWidgets();
         pbWorkProgress.setProgress(0);
-        File dcimDirectoryFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        // Checking dir
-//        File stenoDir = new File(dcimDirectoryFile, "Steganography/Hidden/");
-//        Log.d(TAG, "onCreate: stenoDir = " + stenoDir.getAbsolutePath());
-//        if (!stenoDir.exists()) {
-//            stenoDir.mkdirs();
-//        }
     }
 
     private void initWidgets() {
@@ -134,68 +124,84 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_CODE_GET_IMAGE);
     }
 
-    private void proceed() { // FIXME: 29.11.2016 REFACTOR
+    private void proceed() {
         if (mSourceBitmap == null) {
             Toast.makeText(this, R.string.text_toast_no_image, Toast.LENGTH_SHORT)
                     .show();
             return;
         }
+
         // Direction
-        boolean decode = switchDirection.isChecked();
-        // Checks for encoding
-        String source = etText.getText().toString();
-        if (!decode) {
-            if (source.isEmpty()) {
-                Toast.makeText(this, R.string.text_toast_string_empty, Toast.LENGTH_SHORT)
-                        .show();
-                return;
-            }
-            source = source.concat("\0");
-            // non-ascii check
-            if (Utils.isContainsNonAscii(source)) {
-                Toast.makeText(this, R.string.text_toast_contains_non_ascii, Toast.LENGTH_SHORT)
-                        .show();
-                return;
-            }
-        }
-        // Stenography source
-        SteganographySource steganographySource = new SteganographySource(mSourceBitmap, source);
+        boolean showHiddenText = switchDirection.isChecked();
+
         // LSB
         if (rbLsb.isChecked()) {
-            if (decode) {
-                LSBDecodeTask lsbDecodeTask = new LSBDecodeTask();
-                lsbDecodeTask.setProgressListener(this);
-                lsbDecodeTask.setTaskReadyListener(this);
-                lsbDecodeTask.execute(mSourceBitmap);
+            if (showHiddenText) {
+                showLsb();
             } else {
-                // Length check, specific for LSB
-                long pixels = mSourceBitmap.getWidth() * mSourceBitmap.getHeight();
-                if (pixels < source.length()) {
-                    Toast.makeText(this, R.string.text_toast_string_limit_exceeded, Toast.LENGTH_SHORT)
-                            .show();
-                    return;
-                }
-                LSBEncodeTask lsbEncodeTask = new LSBEncodeTask();
-                lsbEncodeTask.setProgressListener(this);
-                lsbEncodeTask.setTaskReadyListener(this);
-//            lsbEncodeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, steganographySource);
-                lsbEncodeTask.execute(steganographySource);
+                SteganographySource steganographySource = new SteganographySource(
+                        mSourceBitmap, etText.getText().toString().concat("\0")
+                );
+                hideLsb(steganographySource);
             }
-            Log.d(TAG, "proceed: LSB executed");
-
         }
+
         if (rbCjb.isChecked()) {
             Toast.makeText(this, R.string.text_toast_will_be_implemented_soon, Toast.LENGTH_SHORT)
                     .show();
             return;
         }
+
         setControlsEnabled(false);
+    }
+
+    private void hideLsb(SteganographySource source) {
+        // Common text source check
+        if (!sourceTextIsOk(source)) {
+            return;
+        }
+
+        // Length check, specific for LSB
+        long pixels = source.getImage().getWidth() * source.getImage().getHeight();
+        if (pixels < source.getText().length()) {
+            Toast.makeText(this, R.string.text_toast_string_limit_exceeded, Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+
+        LSBEncodeTask lsbEncodeTask = new LSBEncodeTask();
+        lsbEncodeTask.setProgressListener(this);
+        lsbEncodeTask.setTaskReadyListener(this);
+        lsbEncodeTask.execute(source);
+    }
+
+    private boolean sourceTextIsOk(SteganographySource source) {
+        if (source.getText().isEmpty()) {
+            Toast.makeText(this, R.string.text_toast_string_empty, Toast.LENGTH_SHORT)
+                    .show();
+            return false;
+        }
+
+        // non-ascii check
+        if (Utils.isContainsNonAscii(source.getText())) {
+            Toast.makeText(this, R.string.text_toast_contains_non_ascii, Toast.LENGTH_SHORT)
+                    .show();
+            return false;
+        }
+        return true;
+    }
+
+
+    private void showLsb() {
+        LSBDecodeTask lsbDecodeTask = new LSBDecodeTask();
+        lsbDecodeTask.setProgressListener(this);
+        lsbDecodeTask.setTaskReadyListener(this);
+        lsbDecodeTask.execute(mSourceBitmap);
     }
 
     @Override
     public void onProgressChanged(double progress) {
         pbWorkProgress.setProgress((int) (100 * progress));
-        Log.d(TAG, "onProgressChanged: progress = " + progress);
     }
 
     @Override
@@ -205,11 +211,16 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
                     .show();
         } else {
             File dcimDirectoryFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-            // Checking dir
+            // Creating dir if necessary
             File stenoDir = new File(dcimDirectoryFile, "Steganography/Hidden/");
             if (!stenoDir.exists()) {
-                stenoDir.mkdirs();
+                if (!stenoDir.mkdirs()) {
+                    Toast.makeText(this, R.string.text_toast_dir_creation_fail, Toast.LENGTH_SHORT)
+                            .show();
+                    return;
+                }
             }
+            // Saving file
             String outFileName = "Steganography/Hidden/".concat(
                     String.format(Locale.getDefault(), "%1$tT-%1$tF", Calendar.getInstance())
             ).concat(".png");
@@ -217,14 +228,16 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
             OutputStream outputStream;
             try {
                 outputStream = new FileOutputStream(bitmapFile);
+                // Saving as PNG
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
             } catch (FileNotFoundException e) {
                 Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT)
                         .show();
             }
-            Log.d(TAG, "onHideTaskReady: Task Ready! FileAbsPath = " + bitmapFile.getAbsolutePath());
         }
         setControlsEnabled(true);
+        Toast.makeText(this, R.string.text_toast_finished, Toast.LENGTH_LONG)
+                .show();
     }
 
     @Override

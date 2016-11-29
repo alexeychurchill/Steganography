@@ -8,18 +8,18 @@ import android.graphics.Bitmap;
 
 public class SteganographySource {
     private final Bitmap image;
-    private final String source;
+    private final String text;
 
-    public SteganographySource(Bitmap image, String source) {
+    public SteganographySource(Bitmap image, String text) {
         this.image = image;
-        this.source = source;
+        this.text = text;
     }
 
     public Bitmap getImage() {
         return image;
     }
 
-    public String getSource() {
-        return source;
+    public String getText() {
+        return text;
     }
 }
