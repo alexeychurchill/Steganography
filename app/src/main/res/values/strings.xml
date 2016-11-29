@@ -8,4 +8,13 @@
     <string name="text_label_lsb">LSB</string>
     <string name="text_label_cutter_jordan_bossen">Cutter-Jordan-Bossen</string>
     <string name="text_label_text">Text to encode | Decoded text</string>
+    <string name="text_toast_image_io_exception">Error! Image IOException.</string>
+    <string name="text_no_image">No image</string>
+    <string name="text_toast_will_be_implemented_soon">Will be implemented soon</string>
+    <string name="text_toast_string_limit_exceeded">String char limit exceeded</string>
+    <string name="text_toast_smth_gone_wrong">Something gone wrong</string>
+    <string name="text_toast_contains_non_ascii">Contains Unicode</string>
+    <string name="text_toast_no_image">Choose an image!</string>
+    <string name="text_toast_string_empty">Input string is empty</string>
+    <string name="text_toast_image_saving_failed">Image saving failed</string>
 </resources>

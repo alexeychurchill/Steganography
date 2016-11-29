@@ -1,93 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <ProgressBar
         android:id="@+id/pbWorkProgress"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:minHeight="0dp"
         android:max="100"
-        android:progress="75"/>
+        android:minHeight="0dp"
+        android:progress="75" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_margin="@dimen/activity_padding">
+        android:layout_margin="@dimen/activity_padding"
+        android:layout_weight="1">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/text_button_load_an_image"/>
 
-            <ImageView
+            <Button
+                android:id="@+id/btnLoadImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="@dimen/min_height_image_view"
-                android:contentDescription="@null"/>
+                android:text="@string/text_button_load_an_image" />
+
+            <TextView
+                android:id="@+id/tvImageStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/primary_text_light"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/text_no_image" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
+                android:gravity="center"
+                android:orientation="horizontal">
+
                 <TextView
+                    style="@android:style/TextAppearance.Medium"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="@dimen/text_view_margin"
-                    style="@android:style/TextAppearance.Medium"
                     android:text="@string/text_label_encode" />
+
                 <Switch
+                    android:id="@+id/switchDirection"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal" />
+
                 <TextView
+                    style="@android:style/TextAppearance.Medium"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/text_view_margin"
-                    style="@android:style/TextAppearance.Medium"
-                    android:text="@string/text_label_decode"/>
+                    android:text="@string/text_label_decode" />
             </LinearLayout>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/text_label_method"/>
+                android:text="@string/text_label_method" />
+
             <RadioGroup
+                android:id="@+id/rgMethod"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
                 <RadioButton
+                    android:id="@+id/rbLsb"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/text_label_lsb"
-                    android:checked="true" />
+                    android:checked="true"
+                    android:text="@string/text_label_lsb" />
+
                 <RadioButton
+                    android:id="@+id/rbCjb"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/text_label_cutter_jordan_bossen"/>
+                    android:text="@string/text_label_cutter_jordan_bossen" />
             </RadioGroup>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/text_label_text"
-                android:labelFor="@+id/etText"/>
+                android:labelFor="@+id/etText"
+                android:text="@string/text_label_text" />
+
             <EditText
                 android:id="@+id/etText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minLines="3"
-                android:inputType="textMultiLine" />
+                android:inputType="textMultiLine"
+                android:minLines="3" />
         </LinearLayout>
     </ScrollView>
+
     <Button
+        android:id="@+id/btnProceed"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.Button.Colored"
         android:text="@string/text_button_proceed" />
 </LinearLayout>
