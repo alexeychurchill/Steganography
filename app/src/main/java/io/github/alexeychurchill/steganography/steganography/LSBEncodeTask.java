@@ -56,9 +56,9 @@ public class LSBEncodeTask extends AsyncTask<SteganographySource, Double, Bitmap
             int charGreen = (((int) character) & 0x18) >> 3;
             int charBlue = (((int) character) & 0x7);
             // Colors transforming
-            red = (red << 3) & charRed;
-            green = (green << 2) & charGreen;
-            blue = (blue << 3) & charBlue;
+            red = (red << 3) | charRed;
+            green = (green << 2) | charGreen;
+            blue = (blue << 3) | charBlue;
             color = Color.rgb(red, green, blue);
             outputBitmap.setPixel(x, y, color);
             // Image pixel incrementation

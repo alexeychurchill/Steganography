@@ -29,6 +29,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import io.github.alexeychurchill.steganography.R;
+import io.github.alexeychurchill.steganography.steganography.LSBDecodeTask;
 import io.github.alexeychurchill.steganography.steganography.LSBEncodeTask;
 import io.github.alexeychurchill.steganography.steganography.ProgressListener;
 import io.github.alexeychurchill.steganography.steganography.SteganographySource;
@@ -133,42 +134,55 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_CODE_GET_IMAGE);
     }
 
-    private void proceed() {
+    private void proceed() { // FIXME: 29.11.2016 REFACTOR
         if (mSourceBitmap == null) {
             Toast.makeText(this, R.string.text_toast_no_image, Toast.LENGTH_SHORT)
                     .show();
             return;
         }
+        // Direction
+        boolean decode = switchDirection.isChecked();
+        // Checks for encoding
         String source = etText.getText().toString();
-        if (source.isEmpty()) {
-            Toast.makeText(this, R.string.text_toast_string_empty, Toast.LENGTH_SHORT)
-                    .show();
-            return;
-        }
-        source = source.concat("\0");
-        // non-ascii check
-        if (Utils.isContainsNonAscii(source)) {
-            Toast.makeText(this, R.string.text_toast_contains_non_ascii, Toast.LENGTH_SHORT)
-                    .show();
-            return;
+        if (!decode) {
+            if (source.isEmpty()) {
+                Toast.makeText(this, R.string.text_toast_string_empty, Toast.LENGTH_SHORT)
+                        .show();
+                return;
+            }
+            source = source.concat("\0");
+            // non-ascii check
+            if (Utils.isContainsNonAscii(source)) {
+                Toast.makeText(this, R.string.text_toast_contains_non_ascii, Toast.LENGTH_SHORT)
+                        .show();
+                return;
+            }
         }
         // Stenography source
         SteganographySource steganographySource = new SteganographySource(mSourceBitmap, source);
         // LSB
         if (rbLsb.isChecked()) {
-            // Length check, specific for LSB
-            long pixels = mSourceBitmap.getWidth() * mSourceBitmap.getHeight();
-            if (pixels < source.length()) {
-                Toast.makeText(this, R.string.text_toast_string_limit_exceeded, Toast.LENGTH_SHORT)
-                        .show();
-                return;
-            }
-            LSBEncodeTask lsbEncodeTask = new LSBEncodeTask();
-            lsbEncodeTask.setProgressListener(this);
-            lsbEncodeTask.setTaskReadyListener(this);
+            if (decode) {
+                LSBDecodeTask lsbDecodeTask = new LSBDecodeTask();
+                lsbDecodeTask.setProgressListener(this);
+                lsbDecodeTask.setTaskReadyListener(this);
+                lsbDecodeTask.execute(mSourceBitmap);
+            } else {
+                // Length check, specific for LSB
+                long pixels = mSourceBitmap.getWidth() * mSourceBitmap.getHeight();
+                if (pixels < source.length()) {
+                    Toast.makeText(this, R.string.text_toast_string_limit_exceeded, Toast.LENGTH_SHORT)
+                            .show();
+                    return;
+                }
+                LSBEncodeTask lsbEncodeTask = new LSBEncodeTask();
+                lsbEncodeTask.setProgressListener(this);
+                lsbEncodeTask.setTaskReadyListener(this);
 //            lsbEncodeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, steganographySource);
-            lsbEncodeTask.execute(steganographySource);
+                lsbEncodeTask.execute(steganographySource);
+            }
             Log.d(TAG, "proceed: LSB executed");
+
         }
         if (rbCjb.isChecked()) {
             Toast.makeText(this, R.string.text_toast_will_be_implemented_soon, Toast.LENGTH_SHORT)
