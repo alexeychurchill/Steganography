@@ -52,8 +52,8 @@ public class LSBEncodeTask extends AsyncTask<SteganographySource, Double, Bitmap
             green /= 4;
             blue /= 8;
             // Character components of color
-            int charRed = (((int) character) & 0xE0) >> 5;
-            int charGreen = (((int) character) & 0x18) >> 3;
+            int charRed = (((int) character) >> 5) & 0x7;
+            int charGreen = (((int) character) >> 3) & 0x4;
             int charBlue = (((int) character) & 0x7);
             // Colors transforming
             red = (red << 3) | charRed;
