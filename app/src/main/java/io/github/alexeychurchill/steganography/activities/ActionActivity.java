@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,6 +27,8 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import io.github.alexeychurchill.steganography.R;
+import io.github.alexeychurchill.steganography.steganography.CJBDecodeTask;
+import io.github.alexeychurchill.steganography.steganography.CJBEncodeTask;
 import io.github.alexeychurchill.steganography.steganography.LSBDecodeTask;
 import io.github.alexeychurchill.steganography.steganography.LSBEncodeTask;
 import io.github.alexeychurchill.steganography.steganography.ProgressListener;
@@ -36,7 +39,9 @@ import io.github.alexeychurchill.steganography.steganography.Utils;
 public class ActionActivity extends AppCompatActivity implements View.OnClickListener,
         ProgressListener, TaskReadyListener {
     private static final int REQUEST_CODE_GET_IMAGE = 1;
-    private static final String TAG = "ActionActivity";
+    public static final String TAG = "ActionActivity";
+    private static final int FORECAST_AREA = 5;
+    private static final double BIT_ENERGY = 0.2;
     private ProgressBar pbWorkProgress;
     private TextView tvImageStatus;
     private Switch switchDirection;
@@ -146,13 +151,47 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
             }
         }
 
+        // CJB
         if (rbCjb.isChecked()) {
-            Toast.makeText(this, R.string.text_toast_will_be_implemented_soon, Toast.LENGTH_SHORT)
-                    .show();
+            if (showHiddenText) {
+                showCjb();
+                Log.d(TAG, "proceed: cjb show ()");
+            } else {
+                SteganographySource steganographySource = new SteganographySource(
+                        mSourceBitmap, etText.getText().toString().concat("\0")
+                );
+                hideCjb(steganographySource);
+            }
             return;
         }
 
         setControlsEnabled(false);
+    }
+
+    private void hideCjb(SteganographySource source) {
+        if (!sourceTextIsOk(source)) {
+            return;
+        }
+
+        // Length check, specific for CJB
+        long pixels = source.getImage().getWidth() * source.getImage().getHeight() * 8;
+        if (pixels < source.getText().length()) {
+            Toast.makeText(this, R.string.text_toast_string_limit_exceeded, Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+
+        CJBEncodeTask cjbEncodeTask = new CJBEncodeTask(BIT_ENERGY);
+        cjbEncodeTask.setProgressListener(this);
+        cjbEncodeTask.setTaskReadyListener(this);
+        cjbEncodeTask.execute(source);
+    }
+
+    private void showCjb() {
+        CJBDecodeTask cjbDecodeTask = new CJBDecodeTask(FORECAST_AREA);
+        cjbDecodeTask.setProgressListener(this);
+        cjbDecodeTask.setTaskReadyListener(this);
+        cjbDecodeTask.execute(mSourceBitmap);
     }
 
     private void hideLsb(SteganographySource source) {
